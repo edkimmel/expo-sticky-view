@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-sticky-view": ["../src/index"],
+      "expo-sticky-view/*": ["../src/*"]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ExpoStickyViewModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.stickyview.ExpoStickyViewModule"]
+  }
+}
