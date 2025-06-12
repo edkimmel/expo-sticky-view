@@ -12,14 +12,8 @@ class ExpoStickyView: ExpoView {
   private weak var scrollableAncestor: UIScrollView?
   private var scrollObserver: NSKeyValueObservation?
   private var layoutObserver: NSKeyValueObservation?
-
-  private var untransformedFrame: CGRect
+  private var untransformedFrame: CGRect = CGRectZero()
     
-  required init(appContext: AppContext? = nil) {
-    self.untransformedFrame = CGRectZero
-    super.init(appContext: appContext)
-  }
-
   override func didMoveToWindow() {
     super.didMoveToWindow()
     if window != nil {
