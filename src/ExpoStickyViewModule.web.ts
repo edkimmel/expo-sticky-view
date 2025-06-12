@@ -1,6 +1,5 @@
-import { registerWebModule, NativeModule } from 'expo';
+import { NativeModule, registerWebModule } from 'expo';
 
-class ExpoStickyViewModule extends NativeModule {
-}
+class ExpoStickyViewModule extends NativeModule {}
 
 export default registerWebModule(ExpoStickyViewModule, 'ExpoStickyViewModule');

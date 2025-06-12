@@ -12,7 +12,7 @@ class ExpoStickyView: ExpoView {
   private weak var scrollableAncestor: UIScrollView?
   private var scrollObserver: NSKeyValueObservation?
   private var layoutObserver: NSKeyValueObservation?
-  private var untransformedFrame: CGRect = CGRectZero()
+  private var untransformedFrame: CGRect = CGRectZero
     
   override func didMoveToWindow() {
     super.didMoveToWindow()
@@ -91,8 +91,8 @@ class ExpoStickyView: ExpoView {
     }
     onStickyChange([
       "isStuck": shouldStick,
-      "currentFloatDistance": abs(self.transform.ty),
-      "maxFloatDistance": abs(maxTranslation)
+      "currentFloatDistance": round(abs(self.transform.ty)),
+      "maxFloatDistance": round(abs(maxTranslation))
     ])
   }
 
@@ -111,8 +111,8 @@ class ExpoStickyView: ExpoView {
     }
     onStickyChange([
       "isStuck": shouldStick,
-      "currentFloatDistance": abs(self.transform.ty),
-      "maxFloatDistance": abs(minTranslation)
+      "currentFloatDistance": round(abs(self.transform.ty)),
+      "maxFloatDistance": round(abs(minTranslation))
     ])
   }
 

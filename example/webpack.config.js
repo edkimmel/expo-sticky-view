@@ -1,5 +1,5 @@
 const createConfigAsync = require('@expo/webpack-config');
-const path = require('path');
+const path = require('node:path');
 
 module.exports = async (env, argv) => {
   const config = await createConfigAsync(
@@ -9,7 +9,7 @@ module.exports = async (env, argv) => {
         dangerouslyAddModulePathsToTranspile: ['expo-sticky-view'],
       },
     },
-    argv
+    argv,
   );
   config.resolve.modules = [
     path.resolve(__dirname, './node_modules'),

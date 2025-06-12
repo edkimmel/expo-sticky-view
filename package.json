@@ -15,12 +15,7 @@
     "open:ios": "xed example/ios",
     "open:android": "open -a \"Android Studio\" example/android"
   },
-  "keywords": [
-    "react-native",
-    "expo",
-    "expo-sticky-view",
-    "ExpoStickyView"
-  ],
+  "keywords": ["react-native", "expo", "expo-sticky-view", "ExpoStickyView"],
   "repository": "https://github.com/edkimmel/expo-sticky-view",
   "bugs": {
     "url": "https://github.com/edkimmel/expo-sticky-view/issues"
@@ -30,9 +25,10 @@
   "homepage": "https://github.com/edkimmel/expo-sticky-view#readme",
   "dependencies": {},
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/react": "~19.0.0",
-    "expo-module-scripts": "^4.1.6",
     "expo": "~53.0.0",
+    "expo-module-scripts": "^4.1.6",
     "react-native": "0.79.1"
   },
   "peerDependencies": {

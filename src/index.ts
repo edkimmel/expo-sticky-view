@@ -2,4 +2,4 @@
 // and on native platforms to ExpoStickyViewModule.ts
 export { default } from './ExpoStickyViewModule';
 export { default as ExpoStickyView } from './ExpoStickyView';
-export * from  './ExpoStickyView.types';
+export * from './ExpoStickyView.types';
