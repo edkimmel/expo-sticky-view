@@ -9,16 +9,20 @@ import android.view.ViewTreeObserver
 import android.widget.ScrollView
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.views.ExpoView
+import com.facebook.react.views.scroll.ReactScrollView
+import com.facebook.react.views.scroll.ReactScrollViewHelper
+import com.facebook.react.views.scroll.ReactScrollViewManager
+import com.facebook.react.views.scroll.ScrollEventType
 
 fun View.getParentView(): View? {
   val parent = this.parent
   return if (parent is View) parent else null
 }
 
-fun View.findClosestScrollableAncestor(): ScrollView? {
+fun View.findClosestScrollableAncestor(): ReactScrollView? {
   var ancestor: ViewParent? = this.parent
   while (ancestor is ViewGroup) {
-    if (ancestor is ScrollView) {
+    if (ancestor is ReactScrollView) {
       return ancestor
     }
     ancestor = ancestor.parent
@@ -53,33 +57,49 @@ sealed class StickyMode {
 }
 
 class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
-  private var scrollableAncestor: ScrollView? = null
+  private var scrollableAncestor: ReactScrollView? = null
   private var stickyMode: StickyMode = StickyMode.Top(0.0)
-  private var scrollListener = ViewTreeObserver.OnScrollChangedListener {
-    // Calculate the position of this view relative to the scrollable ancestor
-    val parentView = getParentView()
-    val scrollableAncestor = this.scrollableAncestor
-    if (parentView == null || scrollableAncestor == null) {
-      return@OnScrollChangedListener
+  private val scrollListener: ReactScrollViewHelper.ScrollListener = object : ReactScrollViewHelper.ScrollListener {
+    override fun onScroll(
+      scrollView: ViewGroup?,
+      scrollEventType: ScrollEventType?,
+      xVelocity: Float,
+      yVelocity: Float
+    ) {
+      if (scrollView === scrollableAncestor) {
+        applySticky()
+      }
     }
-    when(val stickyMode = this.stickyMode) {
-        is StickyMode.Top -> applyStickyTop(scrollableAncestor, parentView, stickyMode.offset)
-        is StickyMode.Bottom -> applyStickyBottom(scrollableAncestor, parentView, stickyMode.offset)
+    override fun onLayout(scrollView: ViewGroup?) {
+      applySticky()
     }
+
   }
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     this.scrollableAncestor = findClosestScrollableAncestor()
-    this.scrollableAncestor?.viewTreeObserver?.addOnScrollChangedListener(this.scrollListener)
+    ReactScrollViewHelper.addScrollListener(this.scrollListener)
   }
 
   override fun onDetachedFromWindow() {
     super.onDetachedFromWindow()
-    this.scrollableAncestor?.viewTreeObserver?.removeOnScrollChangedListener(this.scrollListener)
+    ReactScrollViewHelper.removeScrollListener(this.scrollListener)
     this.scrollableAncestor = null
   }
 
+  private fun applySticky() {
+    // Calculate the position of this view relative to the scrollable ancestor
+    val parentView = getParentView()
+    val scrollableAncestor = this.scrollableAncestor
+    if (parentView == null || scrollableAncestor == null) {
+      return
+    }
+    when(val stickyMode = this.stickyMode) {
+      is StickyMode.Top -> applyStickyTop(scrollableAncestor, parentView, stickyMode.offset)
+      is StickyMode.Bottom -> applyStickyBottom(scrollableAncestor, parentView, stickyMode.offset)
+    }
+  }
   private fun applyStickyTop(scrollableAncestor: ScrollView, parentView: View, offset: Double) {
     val relativePosition = getLocationRelativeToViewWithoutTranslation(scrollableAncestor)
     val relativeY = relativePosition[1]
@@ -108,14 +128,11 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
   }
 
   fun setStickyTop(offset: Double) {
-
     this.stickyMode = StickyMode.Top(context.dpToPx(offset))
-    // Trigger scroll listener to apply the new sticky mode
-    this.scrollListener.onScrollChanged()
+    applySticky()
   }
   fun setStickyBottom(offset: Double) {
     this.stickyMode = StickyMode.Bottom(context.dpToPx(offset))
-    // Trigger scroll listener to apply the new sticky mode
-    this.scrollListener.onScrollChanged()
+    applySticky()
   }
 }

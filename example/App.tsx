@@ -9,7 +9,7 @@ export default function App() {
           <ExpoStickyView topOffset={0}>
             <View style={{ height: 500, width: '100%', borderColor: 'red', borderWidth: 5 }}/>
           </ExpoStickyView>
-          <ExpoStickyView topOffset={100}>
+          <ExpoStickyView topOffset={0}>
             <View style={{ height: 500, width: '100%', borderColor: 'green', borderWidth: 5 }}/>
           </ExpoStickyView>
           <ExpoStickyView topOffset={200}>
@@ -18,7 +18,7 @@ export default function App() {
         </View>
         <View collapsable={false}>
           <View style={{ height: 1500, width: '100%', borderColor: 'yellow', borderWidth: 5 }}/>
-          <ExpoStickyView bottomOffset={100}>
+          <ExpoStickyView bottomOffset={0}>
             <View style={{ height: 200, width: '100%', borderColor: 'red', borderWidth: 5 }}/>
           </ExpoStickyView>
         </View>
