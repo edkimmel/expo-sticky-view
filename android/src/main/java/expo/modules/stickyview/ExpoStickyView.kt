@@ -1,18 +1,18 @@
 package expo.modules.stickyview
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewParent
-import android.view.ViewTreeObserver
 import android.widget.ScrollView
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.views.ExpoView
 import com.facebook.react.views.scroll.ReactScrollView
 import com.facebook.react.views.scroll.ReactScrollViewHelper
-import com.facebook.react.views.scroll.ReactScrollViewManager
 import com.facebook.react.views.scroll.ScrollEventType
+import expo.modules.kotlin.viewevent.EventDispatcher
+import kotlin.math.abs
+import kotlin.math.round
 
 fun View.getParentView(): View? {
   val parent = this.parent
@@ -51,12 +51,17 @@ fun Context.dpToPx(dp: Double): Double {
   return (dp * this.resources.displayMetrics.density)
 }
 
+fun Context.pxToDp(px: Double): Double {
+  return (px / this.resources.displayMetrics.density)
+}
+
 sealed class StickyMode {
   data class Top(val offset: Double) : StickyMode()
   data class Bottom(val offset: Double) : StickyMode()
 }
 
 class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
+  val onStickyChange by EventDispatcher()
   private var scrollableAncestor: ReactScrollView? = null
   private var stickyMode: StickyMode = StickyMode.Top(0.0)
   private val scrollListener: ReactScrollViewHelper.ScrollListener = object : ReactScrollViewHelper.ScrollListener {
@@ -103,13 +108,21 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
   private fun applyStickyTop(scrollableAncestor: ScrollView, parentView: View, offset: Double) {
     val relativePosition = getLocationRelativeToViewWithoutTranslation(scrollableAncestor)
     val relativeY = relativePosition[1]
-    val maxTranslate = parentView.height - this.height - this.top
-    if (relativeY < offset) {
-      this.translationY = maxTranslate.toFloat().coerceAtMost((offset - relativeY).toFloat())
+    val maxTranslation = parentView.height - this.height - this.top
+    val shouldStick = relativeY < offset
+    if (shouldStick) {
+      val pendingTranslation = offset - relativeY
+      this.translationY = pendingTranslation.toFloat().coerceAtMost(maxTranslation.toFloat())
     } else {
       this.translationY = 0.0f
     }
+    onStickyChange(mapOf(
+        "isStuck" to shouldStick,
+        "currentFloatDistance" to round(context.pxToDp(abs(this.translationY.toDouble()))),
+        "maxFloatDistance" to round(context.pxToDp(abs(maxTranslation.toDouble())))
+    ))
   }
+
   private fun applyStickyBottom(scrollableAncestor: ScrollView, parentView: View, offset: Double) {
     val relativePosition = getLocationRelativeToViewWithoutTranslation(scrollableAncestor)
     val relativeY = relativePosition[1]
@@ -119,12 +132,18 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
     // The max offset we can have is this.top to float to the top of the parent
     val minTranslation = -this.top.toDouble()
 
-    if (relativeBottom > scrollableAncestorHeight - offset) {
+    val shouldStick = relativeBottom > scrollableAncestorHeight - offset
+    if (shouldStick) {
       val delta = scrollableAncestorHeight - offset - relativeBottom
       this.translationY = delta.coerceAtLeast(minTranslation).toFloat()
     } else {
       this.translationY = 0.0f
     }
+    onStickyChange(mapOf(
+      "isStuck" to shouldStick,
+      "currentFloatDistance" to round(context.pxToDp(abs(this.translationY.toDouble()))),
+      "maxFloatDistance" to round(context.pxToDp(abs(minTranslation))),
+    ))
   }
 
   fun setStickyTop(offset: Double) {

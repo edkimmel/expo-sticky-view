@@ -1,5 +1,6 @@
 package expo.modules.stickyview
 
+import android.util.Log
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import java.net.URL
@@ -9,6 +10,7 @@ class ExpoStickyViewModule : Module() {
     Name("ExpoStickyView")
 
     View(ExpoStickyView::class) {
+      Events("onStickyChange")
       Prop("topOffset") { view: ExpoStickyView, top: Double? ->
         if (top != null) {
           view.setStickyTop(top)
