@@ -15,25 +15,17 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container} overScrollMode='never'>
         <View collapsable={false}>
-          <ExpoStickyView topOffset={0}>
-            <View style={{ height: 500, width: '100%', borderColor: 'red', borderWidth: 5 }}/>
-          </ExpoStickyView>
-          <ExpoStickyView topOffset={0}>
-            <View style={{ height: 500, width: '100%', borderColor: 'green', borderWidth: 5 }}/>
-          </ExpoStickyView>
-          <ExpoStickyView topOffset={200}>
-            <View style={{ height: 500, width: '100%', borderColor: 'blue', borderWidth: 5 }}/>
-          </ExpoStickyView>
+          <ExpoStickyView style={{ height: 500, width: '100%', borderColor: 'red', borderWidth: 5 }} topOffset={0} />
+          <ExpoStickyView style={{ height: 500, width: '100%', borderColor: 'green', borderWidth: 5 }} topOffset={0} />
+          <ExpoStickyView style={{ height: 500, width: '100%', borderColor: 'blue', borderWidth: 5 }} topOffset={0} />
         </View>
         <View collapsable={false}>
           <View style={{ height: 1500, width: '100%', borderColor: 'yellow', borderWidth: 5 }}/>
-          <ExpoStickyView bottomOffset={0} onStickyChange={onStickyChange}>
-            <View style={{ height: 200, width: '100%', borderColor: 'red', borderWidth: 5, justifyContent: 'center', alignItems: 'center' }}>
-              <View style={[
-                { backgroundColor: 'purple', width: 100, height: 100 }, 
-                { transform: [{ rotate: `${rotation}deg` }]}
-              ]} />
-            </View>
+          <ExpoStickyView style={{ height: 200, width: '100%', borderColor: 'red', borderWidth: 5, justifyContent: 'center', alignItems: 'center' }} bottomOffset={0} onStickyChange={onStickyChange}>
+            <View style={[
+              { backgroundColor: 'purple', width: 100, height: 100 }, 
+              { transform: [{ rotate: `${rotation}deg` }]}
+            ]} />
           </ExpoStickyView>
         </View>
         <View style={{ height: 1500, width: '100%', borderColor: 'yellow', borderWidth: 5 }}/>
