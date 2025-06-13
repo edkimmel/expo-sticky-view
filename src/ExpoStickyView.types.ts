@@ -1,13 +1,10 @@
-import type { NativeSyntheticEvent, ViewProps } from 'react-native';
+import type { ViewProps } from 'react-native';
+import { StickyChangeEvent } from './NativeExpoStickyView.types';
 
-export type StickyChangeEvent = {
-  isStuck: boolean;
-  currentFloatDistance: number;
-  maxFloatDistance: number;
-};
+export type { StickyChangeEvent } from './NativeExpoStickyView.types';
 
 export type StickyChangeEventCallback = (
-  event: NativeSyntheticEvent<StickyChangeEvent>,
+  event: StickyChangeEvent,
 ) => void;
 
 export type ExpoStickyViewProps = ViewProps &

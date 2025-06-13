@@ -1,7 +1,6 @@
 import { ExpoStickyView, type StickyChangeEvent } from 'expo-sticky-view';
 import React from 'react';
 import {
-  type NativeSyntheticEvent,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -14,11 +13,11 @@ export default function CustomAnimation() {
   const [percent, setPercent] = React.useState(0);
   // In a real app, you would use reanimated spring animations to smooth out the animation between callback invocations.
   const onStickyChange = React.useCallback(
-    (event: NativeSyntheticEvent<StickyChangeEvent>) => {
+    (event: StickyChangeEvent) => {
       const percentComplete =
         1 -
-        event.nativeEvent.currentFloatDistance /
-          event.nativeEvent.maxFloatDistance;
+        event.currentFloatDistance /
+          event.maxFloatDistance;
       setPercent(percentComplete);
     },
     [],
