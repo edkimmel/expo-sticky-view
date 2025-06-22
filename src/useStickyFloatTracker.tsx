@@ -10,40 +10,26 @@ const calculateTopValues = (
   container: HTMLElement
 ) => {
   const marginTop = sticky.style.marginTop ? parseInt(sticky.style.marginTop, 10) : 0
+  
   const originalTop = sentinel.offsetTop + marginTop
   const isStuck = originalTop !== sticky.offsetTop
-
   const currentFloatDistance = Math.max(0, sticky.offsetTop - originalTop)
   const maxFloatDistance = container.offsetHeight - sticky.offsetHeight - originalTop
-  console.debug('calculateTopValues', {
-    originalTop,
-    currentTop: sticky.offsetTop,
-    isStuck,
-    currentFloatDistance,
-    maxFloatDistance,
-  })
   return { currentFloatDistance, isStuck, maxFloatDistance }
 }
 
 // TODO: This assumes the sticky element is positioned at the bottom of the container
 const calculateBottomValues = (
   sticky: HTMLElement,
-  container: HTMLElement,
-  sentinel: HTMLElement
+  sentinel: HTMLElement,
 ) => {
-  const containerRect = container.getBoundingClientRect()
-  const stickyRect = sticky.getBoundingClientRect()
-  const maxFloatDistance = containerRect.height - stickyRect.height
-  const currentFloatDistance = maxFloatDistance - Math.max(
-    0,
-    Math.min(stickyRect.top - containerRect.top, containerRect.height - stickyRect.height),
-  )
-  const isStuck = currentFloatDistance > 0
-  console.debug('calculateBottomValues', {
-    currentFloatDistance,
-    isStuck,
-    maxFloatDistance,
-  })
+  const stickyOffset = sticky.style.bottom ? parseInt(sticky.style.bottom, 10) : 0
+  const marginTop = sticky.style.marginTop ? parseInt(sticky.style.marginTop, 10) : 0
+
+  const originalTop = sentinel.offsetTop + marginTop
+  const isStuck = originalTop !== sticky.offsetTop
+  const currentFloatDistance = Math.max(0, originalTop - sticky.offsetTop)
+  const maxFloatDistance = originalTop - stickyOffset
   return { currentFloatDistance, isStuck, maxFloatDistance }
 }
 
@@ -82,7 +68,7 @@ const useStickyFloatTracker = (
         const { isStuck, currentFloatDistance, maxFloatDistance } = calculateTopValues(sticky, sentinel, container)
         onFloatChange?.({ isStuck, currentFloatDistance: currentFloatDistance, maxFloatDistance })
       } else if (sticky.style.bottom !== '') {
-        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateBottomValues(sticky, sentinel, container)
+        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateBottomValues(sticky, sentinel)
         onFloatChange?.({ isStuck, currentFloatDistance: currentFloatDistance, maxFloatDistance })
       }
     }

@@ -8,20 +8,57 @@ import {
   View,
 } from 'react-native';
 
-export default function CustomAnimation() {
-  const [height, setHeight] = React.useState(0);
+
+type StickyRectangleProps = {  
+  height: number;
+  bottomOffset?: number;
+  marginTop?: number;
+};
+
+const StickyRectangle: React.FC<StickyRectangleProps> = ({ height, marginTop, bottomOffset }) => {
   const [percent, setPercent] = React.useState(0);
   // In a real app, you would use reanimated spring animations to smooth out the animation between callback invocations.
   const onStickyChange = React.useCallback(
     (event: StickyChangeEvent) => {
-      const percentComplete =
-        1 -
+      const percentComplete = 1 -
         event.currentFloatDistance /
           event.maxFloatDistance;
       setPercent(percentComplete);
     },
     [],
   );
+
+  return (
+    <ExpoStickyView
+      style={[styles.animationContainer, { height, marginTop }]}
+      bottomOffset={bottomOffset ?? 0}
+      onStickyChange={onStickyChange}
+    >
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <View
+          style={[
+            styles.rectangle,
+            { transform: [{ rotate: `${3600 * percent}deg` }] },
+          ]}
+        />
+      </View>
+      <View style={{ alignItems: 'center' }}>
+        <View
+          style={[styles.progressBar, { width: `${percent * 100}%` }]}
+        />
+      </View>
+    </ExpoStickyView>
+  )
+}
+
+export default function CustomAnimation() {
+  const [height, setHeight] = React.useState(0);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -31,39 +68,34 @@ export default function CustomAnimation() {
       >
         <Text style={styles.text}>
           Custom Animation Example.{'\n'}
-          CSS Equivalent: position: sticky; bottom: 0{'\n'}
+          CSS Equivalent: position: sticky; top: 0{'\n'}
           Shows how to take over vertical scrolling to play a custom animation
           for some pixel "duration".
         </Text>
         <View style={styles.space} />
-        <View collapsable={false}>
-          {/* This is the "duration" of our animation.  This is the height in pixels that our animation container will float over */}
+        <Text style={styles.text}>
+          No bottom offset, no margin, no previous siblings
+        </Text>
+        <View collapsable={false} style={styles.stickyParent}>
           <View style={{ height: 1500 }} />
-          <ExpoStickyView
-            style={[styles.animationContainer, { height: height / 2 }]}
-            bottomOffset={0}
-            onStickyChange={onStickyChange}
-          >
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <View
-                style={[
-                  styles.rectangle,
-                  { transform: [{ rotate: `${3600 * percent}deg` }] },
-                ]}
-              />
-            </View>
-            <View style={{ alignItems: 'center' }}>
-              <View
-                style={[styles.progressBar, { width: `${percent * 100}%` }]}
-              />
-            </View>
-          </ExpoStickyView>
+          <StickyRectangle height={height / 2} />
+        </View>
+
+        <Text style={styles.text}>
+          Bottom offset and margin
+        </Text>
+        <View collapsable={false} style={styles.stickyParent}>
+          <View style={{ height: 1500 }} />
+          <StickyRectangle height={height / 2} bottomOffset={100} marginTop={100} />
+        </View>
+
+        <Text style={styles.text}>
+          Siblings after the sticky view
+        </Text>
+        <View collapsable={false} style={styles.stickyParent}>
+          <View style={{ height: 1500 }} />
+          <StickyRectangle height={height / 2} bottomOffset={100} marginTop={100} />
+          <View style={styles.space} />
         </View>
         <View style={styles.space} />
       </ScrollView>
@@ -80,6 +112,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#eee',
+  },
+  stickyParent: {
+    backgroundColor: 'gray',
   },
   animationContainer: {
     width: '100%',
