@@ -40,7 +40,7 @@ export default function CustomAnimation() {
           {/* This is the "duration" of our animation.  This is the height in pixels that our animation container will float over */}
           <View style={{ height: 1500 }} />
           <ExpoStickyView
-            style={[styles.animationContainer, { height }]}
+            style={[styles.animationContainer, { height: height / 2 }]}
             bottomOffset={0}
             onStickyChange={onStickyChange}
           >

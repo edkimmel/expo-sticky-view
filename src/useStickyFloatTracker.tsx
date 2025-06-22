@@ -3,21 +3,34 @@ import React from 'react'
 import { StickyChangeEventCallback } from './ExpoStickyView.types'
 import { View } from 'react-native'
 
-const calculateTopValues = (container: HTMLElement, sticky: HTMLElement, scrollable: Element) => {
-  const containerRect = container.getBoundingClientRect()
-  const stickyRect = sticky.getBoundingClientRect()
-  const stickyOffset = parseInt(sticky.style.top ?? 0, 10)
-  const originalTop = containerRect.top + sticky.offsetTop
-  const currentFloatDistance = Math.max(
-    0,
-    Math.min(scrollable.scrollTop + stickyOffset - originalTop, containerRect.height - stickyRect.height),
-  )
-  const isStuck = currentFloatDistance > 0
-  const maxFloatDistance = containerRect.height - stickyRect.height
+// TODO: This assumes the sticky element is positioned at the top of the container
+const calculateTopValues = (
+  sticky: HTMLElement,
+  sentinel: HTMLElement,
+  container: HTMLElement
+) => {
+  const marginTop = sticky.style.marginTop ? parseInt(sticky.style.marginTop, 10) : 0
+  const originalTop = sentinel.offsetTop + marginTop
+  const isStuck = originalTop !== sticky.offsetTop
+
+  const currentFloatDistance = Math.max(0, sticky.offsetTop - originalTop)
+  const maxFloatDistance = container.offsetHeight - sticky.offsetHeight - originalTop
+  console.debug('calculateTopValues', {
+    originalTop,
+    currentTop: sticky.offsetTop,
+    isStuck,
+    currentFloatDistance,
+    maxFloatDistance,
+  })
   return { currentFloatDistance, isStuck, maxFloatDistance }
 }
 
-const calculateBottomValues = (sticky: HTMLElement, container: HTMLElement, scrollable: Element) => {
+// TODO: This assumes the sticky element is positioned at the bottom of the container
+const calculateBottomValues = (
+  sticky: HTMLElement,
+  container: HTMLElement,
+  sentinel: HTMLElement
+) => {
   const containerRect = container.getBoundingClientRect()
   const stickyRect = sticky.getBoundingClientRect()
   const maxFloatDistance = containerRect.height - stickyRect.height
@@ -55,19 +68,21 @@ function getScrollingAncestor(element: HTMLElement) {
 
 const useStickyFloatTracker = (
   stickyRef: React.RefObject<View | null>,
+  sentinelRef: React.RefObject<Text | null>,
   onFloatChange?: StickyChangeEventCallback | null,
 ) => {
   React.useEffect(() => {
     const sticky = stickyRef.current as HTMLElement | null
+    const sentinel = sentinelRef.current as HTMLElement | null
     const container = sticky?.parentElement
     const scrollElement = sticky && getScrollingAncestor(sticky)
-    if (!sticky || !container || !scrollElement) return
+    if (!sticky || !sentinel || !container || !scrollElement) return
     const handleScroll = () => {
       if (sticky.style.top !== '') {
-        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateTopValues(sticky, container, scrollElement)
+        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateTopValues(sticky, sentinel, container)
         onFloatChange?.({ isStuck, currentFloatDistance: currentFloatDistance, maxFloatDistance })
       } else if (sticky.style.bottom !== '') {
-        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateBottomValues(sticky, container, scrollElement)
+        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateBottomValues(sticky, sentinel, container)
         onFloatChange?.({ isStuck, currentFloatDistance: currentFloatDistance, maxFloatDistance })
       }
     }

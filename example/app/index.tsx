@@ -16,8 +16,11 @@ export default function App() {
         <Link href="/parallax" style={styles.link}>
           <Text>Top Sticky Parallax Slides</Text>
         </Link>
-        <Link href="/custom" style={styles.link}>
+        <Link href="/custom-bottom" style={styles.link}>
           <Text>Bottom Sticky Custom Animation</Text>
+        </Link>
+        <Link href="/custom-top" style={styles.link}>
+          <Text>Top Sticky Custom Animation</Text>
         </Link>
       </ScrollView>
     </SafeAreaView>
