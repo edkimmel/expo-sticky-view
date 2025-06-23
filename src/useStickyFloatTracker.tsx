@@ -10,7 +10,7 @@ const calculateTopValues = (
   container: HTMLElement
 ) => {
   const marginTop = sticky.style.marginTop ? parseInt(sticky.style.marginTop, 10) : 0
-  
+
   const originalTop = sentinel.offsetTop + marginTop
   const isStuck = originalTop !== sticky.offsetTop
   const currentFloatDistance = Math.max(0, sticky.offsetTop - originalTop)
@@ -81,7 +81,7 @@ const useStickyFloatTracker = (
       scrollElement.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
     }
-  }, [stickyRef, onFloatChange])
+  }, [stickyRef, sentinelRef, onFloatChange])
 }
 
 export default useStickyFloatTracker
