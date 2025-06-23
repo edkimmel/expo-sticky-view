@@ -3,7 +3,6 @@ import React from 'react'
 import { StickyChangeEventCallback } from './ExpoStickyView.types'
 import { View } from 'react-native'
 
-// TODO: This assumes the sticky element is positioned at the top of the container
 const calculateTopValues = (
   sticky: HTMLElement,
   sentinel: HTMLElement,
@@ -18,7 +17,6 @@ const calculateTopValues = (
   return { currentFloatDistance, isStuck, maxFloatDistance }
 }
 
-// TODO: This assumes the sticky element is positioned at the bottom of the container
 const calculateBottomValues = (
   sticky: HTMLElement,
   sentinel: HTMLElement,
