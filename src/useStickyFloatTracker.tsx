@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import React from 'react'
 import { StickyChangeEventCallback } from './ExpoStickyView.types'
-import { View } from 'react-native'
+import { Text, View } from 'react-native'
 
 const calculateTopValues = (
   sticky: HTMLElement,
