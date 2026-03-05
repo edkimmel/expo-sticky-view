@@ -10,12 +10,16 @@ public class ExpoStickyViewModule: Module {
       Prop("topOffset") { (view: ExpoStickyView, top: Double?) in
         if let top = top {
           view.setStickyTop(top)
+        } else {
+          view.clearSticky()
         }
       }
 
       Prop("bottomOffset") { (view: ExpoStickyView, bottom: Double?) in
         if let bottom = bottom {
           view.setStickyBottom(bottom)
+        } else {
+          view.clearSticky()
         }
       }
     }

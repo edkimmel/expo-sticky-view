@@ -13,6 +13,9 @@ class ExpoStickyView: ExpoView {
   private var scrollObserver: NSKeyValueObservation?
   private var layoutObserver: NSKeyValueObservation?
   private var untransformedFrame: CGRect = CGRectZero
+  private var lastIsStuck: Bool?
+  private var lastCurrentFloatDistance: CGFloat?
+  private var lastMaxFloatDistance: CGFloat?
     
   override func didMoveToWindow() {
     super.didMoveToWindow()
@@ -66,6 +69,19 @@ class ExpoStickyView: ExpoView {
     return CGPoint(x: myFrame.origin.x - self.transform.tx, y: myFrame.origin.y - self.transform.ty)
   }
 
+  private func emitStickyChangeIfNeeded(isStuck: Bool, currentFloatDistance: CGFloat, maxFloatDistance: CGFloat) {
+    if isStuck != lastIsStuck || currentFloatDistance != lastCurrentFloatDistance || maxFloatDistance != lastMaxFloatDistance {
+      lastIsStuck = isStuck
+      lastCurrentFloatDistance = currentFloatDistance
+      lastMaxFloatDistance = maxFloatDistance
+      onStickyChange([
+        "isStuck": isStuck,
+        "currentFloatDistance": currentFloatDistance,
+        "maxFloatDistance": maxFloatDistance
+      ])
+    }
+  }
+
   private func applySticky() {
     guard let ancestor = scrollableAncestor, let parent = self.superview else { return }
     switch stickyMode {
@@ -81,25 +97,23 @@ class ExpoStickyView: ExpoView {
     let relativeY = relativePosition.y - scrollableAncestor.contentOffset.y
     let maxTranslation = CGFloat(parentView.bounds.height - self.bounds.height - self.untransformedFrame.origin.y)
     let shouldStick = relativeY < offset
-      
-//    NSLog("Bounds \(self.bounds.origin.y) RelativeY: \(relativePosition.y), ContentOffset: \(scrollableAncestor.contentOffset.y) OriginalY: \(self.untransformedFrame.origin.y)")
     if shouldStick {
       let pendingTranslation = offset - relativeY
       self.transform = CGAffineTransform(translationX: 0, y: min(pendingTranslation, maxTranslation))
     } else {
       self.transform = .identity
     }
-    onStickyChange([
-      "isStuck": shouldStick,
-      "currentFloatDistance": round(abs(self.transform.ty)),
-      "maxFloatDistance": round(abs(maxTranslation))
-    ])
+    emitStickyChangeIfNeeded(
+      isStuck: shouldStick,
+      currentFloatDistance: round(abs(self.transform.ty)),
+      maxFloatDistance: round(abs(maxTranslation))
+    )
   }
 
   private func applyStickyBottom(scrollableAncestor: UIScrollView, parentView: UIView, offset: CGFloat) {
     let relativePosition = getLocationRelativeToView(scrollableAncestor)
     let relativeY = relativePosition.y - scrollableAncestor.contentOffset.y
-    let scrollableAncestorHeight = scrollableAncestor.bounds.height
+    let scrollableAncestorHeight = scrollableAncestor.bounds.height - scrollableAncestor.adjustedContentInset.bottom
     let relativeBottom = relativeY + self.bounds.height
     let minTranslation = -self.untransformedFrame.origin.y
     let shouldStick = relativeBottom > scrollableAncestorHeight - offset
@@ -109,11 +123,11 @@ class ExpoStickyView: ExpoView {
     } else {
       self.transform = .identity
     }
-    onStickyChange([
-      "isStuck": shouldStick,
-      "currentFloatDistance": round(abs(self.transform.ty)),
-      "maxFloatDistance": round(abs(minTranslation))
-    ])
+    emitStickyChangeIfNeeded(
+      isStuck: shouldStick,
+      currentFloatDistance: round(abs(self.transform.ty)),
+      maxFloatDistance: round(abs(minTranslation))
+    )
   }
 
   // MARK: - Props
@@ -125,5 +139,13 @@ class ExpoStickyView: ExpoView {
   func setStickyBottom(_ offset: Double) {
     stickyMode = .bottom(offset: CGFloat(offset))
     applySticky()
+  }
+
+  func clearSticky() {
+    self.transform = .identity
+    stickyMode = .top(offset: 0)
+    lastIsStuck = nil
+    lastCurrentFloatDistance = nil
+    lastMaxFloatDistance = nil
   }
 }

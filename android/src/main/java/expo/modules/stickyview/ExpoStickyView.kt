@@ -64,6 +64,9 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
   val onStickyChange by EventDispatcher()
   private var scrollableAncestor: ReactScrollView? = null
   private var stickyMode: StickyMode = StickyMode.Top(0.0)
+  private var lastIsStuck: Boolean? = null
+  private var lastCurrentFloatDistance: Double? = null
+  private var lastMaxFloatDistance: Double? = null
   private val scrollListener: ReactScrollViewHelper.ScrollListener = object : ReactScrollViewHelper.ScrollListener {
     override fun onScroll(
       scrollView: ViewGroup?,
@@ -76,7 +79,9 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
       }
     }
     override fun onLayout(scrollView: ViewGroup?) {
-      applySticky()
+      if (scrollView === scrollableAncestor) {
+        applySticky()
+      }
     }
 
   }
@@ -91,6 +96,19 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
     super.onDetachedFromWindow()
     ReactScrollViewHelper.removeScrollListener(this.scrollListener)
     this.scrollableAncestor = null
+  }
+
+  private fun emitStickyChangeIfNeeded(isStuck: Boolean, currentFloatDistance: Double, maxFloatDistance: Double) {
+    if (isStuck != lastIsStuck || currentFloatDistance != lastCurrentFloatDistance || maxFloatDistance != lastMaxFloatDistance) {
+      lastIsStuck = isStuck
+      lastCurrentFloatDistance = currentFloatDistance
+      lastMaxFloatDistance = maxFloatDistance
+      onStickyChange(mapOf(
+        "isStuck" to isStuck,
+        "currentFloatDistance" to currentFloatDistance,
+        "maxFloatDistance" to maxFloatDistance
+      ))
+    }
   }
 
   private fun applySticky() {
@@ -116,11 +134,11 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
     } else {
       this.translationY = 0.0f
     }
-    onStickyChange(mapOf(
-        "isStuck" to shouldStick,
-        "currentFloatDistance" to round(context.pxToDp(abs(this.translationY.toDouble()))),
-        "maxFloatDistance" to round(context.pxToDp(abs(maxTranslation.toDouble())))
-    ))
+    emitStickyChangeIfNeeded(
+      shouldStick,
+      round(context.pxToDp(abs(this.translationY.toDouble()))),
+      round(context.pxToDp(abs(maxTranslation.toDouble())))
+    )
   }
 
   private fun applyStickyBottom(scrollableAncestor: ScrollView, parentView: View, offset: Double) {
@@ -139,11 +157,11 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
     } else {
       this.translationY = 0.0f
     }
-    onStickyChange(mapOf(
-      "isStuck" to shouldStick,
-      "currentFloatDistance" to round(context.pxToDp(abs(this.translationY.toDouble()))),
-      "maxFloatDistance" to round(context.pxToDp(abs(minTranslation))),
-    ))
+    emitStickyChangeIfNeeded(
+      shouldStick,
+      round(context.pxToDp(abs(this.translationY.toDouble()))),
+      round(context.pxToDp(abs(minTranslation)))
+    )
   }
 
   fun setStickyTop(offset: Double) {
@@ -153,5 +171,12 @@ class ExpoStickyView(context: Context, appContext: AppContext) : ExpoView(contex
   fun setStickyBottom(offset: Double) {
     this.stickyMode = StickyMode.Bottom(context.dpToPx(offset))
     applySticky()
+  }
+  fun clearSticky() {
+    this.translationY = 0.0f
+    this.stickyMode = StickyMode.Top(0.0)
+    lastIsStuck = null
+    lastCurrentFloatDistance = null
+    lastMaxFloatDistance = null
   }
 }
