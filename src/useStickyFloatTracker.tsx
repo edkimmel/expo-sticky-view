@@ -8,7 +8,7 @@ const calculateTopValues = (
   sentinel: HTMLElement,
   container: HTMLElement
 ) => {
-  const marginTop = sticky.style.marginTop ? parseInt(sticky.style.marginTop, 10) : 0
+  const marginTop = sticky.style.marginTop ? parseFloat(sticky.style.marginTop) : 0
 
   const originalTop = sentinel.offsetTop + marginTop
   const isStuck = originalTop !== sticky.offsetTop
@@ -21,8 +21,8 @@ const calculateBottomValues = (
   sticky: HTMLElement,
   sentinel: HTMLElement,
 ) => {
-  const stickyOffset = sticky.style.bottom ? parseInt(sticky.style.bottom, 10) : 0
-  const marginTop = sticky.style.marginTop ? parseInt(sticky.style.marginTop, 10) : 0
+  const stickyOffset = sticky.style.bottom ? parseFloat(sticky.style.bottom) : 0
+  const marginTop = sticky.style.marginTop ? parseFloat(sticky.style.marginTop) : 0
 
   const originalTop = sentinel.offsetTop + marginTop
   const isStuck = originalTop !== sticky.offsetTop
@@ -61,13 +61,21 @@ const useStickyFloatTracker = (
     const container = sticky?.parentElement
     const scrollElement = sticky && getScrollingAncestor(sticky)
     if (!sticky || !sentinel || !container || !scrollElement) return
+    let lastIsStuck: boolean | undefined
+    let lastCurrentFloatDistance: number | undefined
+    let lastMaxFloatDistance: number | undefined
     const handleScroll = () => {
+      let values: { isStuck: boolean; currentFloatDistance: number; maxFloatDistance: number } | undefined
       if (sticky.style.top !== '') {
-        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateTopValues(sticky, sentinel, container)
-        onFloatChange?.({ isStuck, currentFloatDistance: currentFloatDistance, maxFloatDistance })
+        values = calculateTopValues(sticky, sentinel, container)
       } else if (sticky.style.bottom !== '') {
-        const { isStuck, currentFloatDistance, maxFloatDistance } = calculateBottomValues(sticky, sentinel)
-        onFloatChange?.({ isStuck, currentFloatDistance: currentFloatDistance, maxFloatDistance })
+        values = calculateBottomValues(sticky, sentinel)
+      }
+      if (values && (values.isStuck !== lastIsStuck || values.currentFloatDistance !== lastCurrentFloatDistance || values.maxFloatDistance !== lastMaxFloatDistance)) {
+        lastIsStuck = values.isStuck
+        lastCurrentFloatDistance = values.currentFloatDistance
+        lastMaxFloatDistance = values.maxFloatDistance
+        onFloatChange?.(values)
       }
     }
 
